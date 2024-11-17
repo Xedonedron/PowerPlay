@@ -1,5 +1,4 @@
-# Menjalankan image postgres:13 yang punya volume biar nempel di folder terkait
-## tujuannya biar bisa ngeload data ke postgres
+# Start the postgres:13 image and attach it with the volume according to the directory 
 
 ```
 docker run -d\
@@ -12,11 +11,11 @@ docker run -d\
   --name postgres_kafka \
   postgres:13
 ```
-
+# Run the built container
 docker run --name postgres_kafka -e POSTGRES_PASSWORD=root -p 5432:5432 -d postgres:13
 
-# start image pgadmin pakai network
-## NOTE, host name/address nya ini bukan localhost, melainkan nama database nya postgres (pg-database) - gatau kenapa, coba kulik ke chatgpt aja
+# start image pgadmin using network
+## NOTE, the hostname/address is not "localhost", but the postgres databases name itself, dunno why
 ```
 docker run -d \
   -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
@@ -38,17 +37,17 @@ bin/kafka-topics.sh --create --topic fitbit_data --bootstrap-server localhost:90
 bin/kafka-topics.sh --delete --topic iot_sensors --bootstrap-server localhost:9092
   ```
 
-- cek topic
+- check topic
   ```
 bin/kafka-topics.sh --describe --topic iot_sensors  --bootstrap-server localhost:9092
 ```
 
-- consume data hasil dari topic
+- consume data from topic
   ```
 bin/kafka-console-consumer.sh --topic fitbit_data  --bootstrap-server localhost:9092 --from-beginning
 ```
 
-- consume topic on group (buat testing consumer)
+- consume topic on group (for testing consumer)
 ```
 bin\windows\kafka-console-consumer.bat --topic iot_sensors --bootstrap-server localhost:9092 --from-beginning --group iot_tools
 ```

@@ -1,8 +1,11 @@
+# For every message that get fetch from the topic, it'll loaded to the database
+# So the concept will like doing OLTP database, event for every row of second the data
+
 from kafka import KafkaConsumer
 import psycopg2
 import json
 
-# Konfigurasi Kafka Consumer
+# Config consumer
 consumer = KafkaConsumer(
     'fitbit_data',
     bootstrap_servers='localhost:9092',
@@ -12,7 +15,7 @@ consumer = KafkaConsumer(
     value_deserializer=lambda x: json.loads(x.decode('utf-8'))
 )
 
-# Konfigurasi koneksi ke PostgreSQL
+# Config to connect the PostgreSQL Database
 conn = psycopg2.connect(
     host="localhost",
     database="kafka_stream",
@@ -21,7 +24,7 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-# Buat tabel dengan kolom yang sesuai untuk data kesehatan pagi
+# Create table
 cur.execute("""
     CREATE TABLE IF NOT EXISTS morning_health_data (
         id SERIAL PRIMARY KEY,
@@ -39,12 +42,11 @@ cur.execute("""
 """)
 conn.commit()
 
-# Proses data dari Kafka dan masukkan ke PostgreSQL
+# load the data
 for message in consumer:
     data = message.value
 
     try:
-        # Lakukan INSERT ke tabel PostgreSQL
         cur.execute("""
             INSERT INTO morning_health_data (
                 athlete_id, date, time, sleep_duration, sleep_quality,
@@ -68,6 +70,6 @@ for message in consumer:
         print(f'Error processing message: {e}')
         conn.rollback()
 
-# Tutup koneksi setelah selesai
+# Close connection
 cur.close()
 conn.close()
